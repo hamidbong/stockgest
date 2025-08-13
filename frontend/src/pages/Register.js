@@ -1,43 +1,40 @@
 import React, { useState } from "react";
 import { registerUser } from "../services/api";
-import { useNavigate } from "react-router-dom";
+import "./Auth.css";
 
 export default function Register() {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [message, setMessage] = useState("");
-    const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const data = await registerUser(username, password);
-        setMessage(data.message);
-        if (data.message.includes("successfully")) {
-            setTimeout(() => navigate("/login"), 1500);
-        }
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const res = await registerUser({ username, password });
+    alert(res.message);
+  };
 
-    return (
-        <div className="container">
-            <h2>Register</h2>
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="text"
-                    placeholder="Username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-                <button type="submit">Register</button>
-            </form>
-            {message && <p>{message}</p>}
-        </div>
-    );
+  return (
+    <div className="auth-container">
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <h2>Inscription</h2>
+        <input
+          type="text"
+          placeholder="Nom d'utilisateur"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Mot de passe"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <button type="submit">S'inscrire</button>
+        <p>
+          Déjà un compte ? <a href="/login">Connectez-vous</a>
+        </p>
+      </form>
+    </div>
+  );
 }

@@ -1,45 +1,40 @@
 import React, { useState } from "react";
 import { loginUser } from "../services/api";
-import { useNavigate } from "react-router-dom";
+import "./Auth.css";
 
 export default function Login() {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [message, setMessage] = useState("");
-    const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const data = await loginUser(username, password);
-        if (data.token) {
-            localStorage.setItem("token", data.token);
-            navigate("/dashboard");
-        } else {
-            setMessage(data.message);
-        }
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const res = await loginUser({ username, password });
+    alert(res.token ? "Connexion réussie !" : res.message);
+  };
 
-    return (
-        <div className="container">
-            <h2>Login</h2>
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="text"
-                    placeholder="Username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-                <button type="submit">Login</button>
-            </form>
-            {message && <p>{message}</p>}
-        </div>
-    );
+  return (
+    <div className="auth-container">
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <h2>Connexion</h2>
+        <input
+          type="text"
+          placeholder="Nom d'utilisateur"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Mot de passe"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <button type="submit">Se connecter</button>
+        <p>
+          Pas encore de compte ? <a href="/register">Inscrivez-vous</a>
+        </p>
+      </form>
+    </div>
+  );
 }
