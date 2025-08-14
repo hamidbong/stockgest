@@ -7,24 +7,64 @@ const router = express.Router();
 
 // Register
 router.post("/register", async (req, res) => {
-    const { username, password } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ username, password: hashedPassword });
-    await user.save();
-    res.json({ message: "User registered successfully" });
+    try {
+        const { username, password } = req.body;
+        
+        // Validate input
+        if (!username || !password) {
+            return res.status(400).json({ message: "Username and password are required" });
+        }
+
+        // Check if user already exists
+        const existingUser = await User.findOne({ username });
+        if (existingUser) {
+            return res.status(400).json({ message: "Username already exists" });
+        }
+
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+        
+        // Create user
+        const user = new User({ username, password: hashedPassword });
+        await user.save();
+        
+        res.status(201).json({ message: "User registered successfully" });
+    } catch (error) {
+        console.error("Registration error:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
 });
 
 // Login
 router.post("/login", async (req, res) => {
-    const { username, password } = req.body;
-    const user = await User.findOne({ username });
-    if (!user) return res.status(400).json({ message: "Invalid credentials" });
+    try {
+        const { username, password } = req.body;
+        
+        // Validate input
+        if (!username || !password) {
+            return res.status(400).json({ message: "Username and password are required" });
+        }
 
-    const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(400).json({ message: "Invalid credentials" });
+        // Find user
+        const user = await User.findOne({ username });
+        if (!user) {
+            return res.status(400).json({ message: "Invalid credentials" });
+        }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
-    res.json({ token });
+        // Compare passwords
+        const match = await bcrypt.compare(password, user.password);
+        if (!match) {
+            return res.status(400).json({ message: "Invalid credentials" });
+        }
+
+        // Create token
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+        
+        res.json({ token });
+    } catch (error) {
+        console.error("Login error:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
 });
 
 export default router;
